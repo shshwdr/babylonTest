@@ -136,6 +136,6 @@ async function reloadScene() {
       scene.render();
   });
 }
-Inspector.Show(scene, {
+// Inspector.Show(scene, {
 
-});
+// });

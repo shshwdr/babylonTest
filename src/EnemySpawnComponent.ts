@@ -30,7 +30,7 @@ export class EnemySpawnComponent {
     }
 
     private spawnEnemy(): void {
-        const distance = 10;
+        const distance = 100;
         const randomX = Math.random() * distance - distance / 2;
         const randomZ = Math.random() * distance - distance / 2;
 
@@ -59,7 +59,9 @@ export class EnemySpawnComponent {
     private destroyEnemy(enemyMesh: BABYLON.TransformNode): void {
         enemyMesh.dispose();
        ( enemyMesh as any).hpComponent.progressBar.background.dispose();
-        ( enemyMesh as any).enemyComponent.hitbox.dispose();
+        //( enemyMesh as any).enemyComponent.hitbox.dispose()
+        //this.
+        ( enemyMesh as any).enemyDamageComponent.destroy()
         EnemyManager.getInstance().removeEnemy(enemyMesh);
 
     }
