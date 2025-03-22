@@ -1,23 +1,22 @@
- import { UpdateManager } from "./UpdateManager";
-    import { ProgressBarComponent } from "./ProgressBarComponent";
-    import * as BABYLON from "@babylonjs/core";
+import * as BABYLON from "@babylonjs/core";
+import { Component } from "./ComponentSystem";
+import { ProgressBarComponent } from "./ProgressBarComponent";
 
-// --- 3. HPComponent ---
-export class HPComponent {
+export class HPComponent extends Component {
+    private currentHP: number;
+
     constructor(
-        private owner: BABYLON.Mesh,
+        owner: BABYLON.TransformNode,
         private maxHP: number,
         private onDeath: () => void,
         private progressBar?: ProgressBarComponent
     ) {
+        super(owner);
         this.currentHP = maxHP;
         this.updateBar();
     }
 
-    private currentHP: number;
-
-    takeDamage(amount: number) {
-
+    public takeDamage(amount: number): void {
         console.log("HPComponent: takeDamage", amount);
         this.currentHP -= amount;
         if (this.currentHP <= 0) {
@@ -30,7 +29,7 @@ export class HPComponent {
         }
     }
 
-    private updateBar() {
+    private updateBar(): void {
         this.progressBar?.update(this.currentHP, this.maxHP);
     }
 }

@@ -3,7 +3,7 @@ import { ProgressBarComponent } from "./ProgressBarComponent";
 // --- 4. 血条挂载与跟随 ---
 import * as GUI from "@babylonjs/gui";
 
-export function CreateHealthBar(scene: BABYLON.Scene, owner: BABYLON.AbstractMesh ,fillColor: string): ProgressBarComponent {
+export function CreateHealthBar(scene: BABYLON.Scene, owner: BABYLON.TransformNode ,fillColor: string): ProgressBarComponent {
     const ui = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, scene);
 
     const container = new GUI.Rectangle();
@@ -25,7 +25,13 @@ export function CreateHealthBar(scene: BABYLON.Scene, owner: BABYLON.AbstractMes
 
     // ✅ 将血条绑定到人物模型上方
     container.linkWithMesh(owner);
-    container.linkOffsetY = -100; // 调整垂直偏移：负值代表往上移动（单位是像素）
-
+    var dis = -100
+    if (owner.name === "player"){
+        dis = -50
+    }
+    container.linkOffsetY = dis; // 调整垂直偏移：负值代表往上移动（单位是像素）
+    owner.onDisposeObservable.addOnce(() => {
+        container.dispose(); // 销毁血条 GUI 元素
+    });
     return new ProgressBarComponent(bar, container);
 }

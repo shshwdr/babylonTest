@@ -53,9 +53,24 @@ export class ComponentUpdateManager {
         this.updatables.delete(component);
     }
 
-    update(deltaTime: number): void {
+    public update(deltaTime: number) {
+        if (this.paused) return;
         this.updatables.forEach(c => c.update?.(deltaTime));
-    }
+      }
+      public clear(): void {
+        this.updatables.clear();
+        this.paused = false;
+      }
+    private paused = false;
+
+public pause() {
+  this.paused = true;
+}
+
+public resume() {
+  this.paused = false;
+}
+
 }
 
 // 用法示例：
