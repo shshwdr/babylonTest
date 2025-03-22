@@ -1,16 +1,17 @@
 import * as BABYLON from "@babylonjs/core";
 import * as GUI from "@babylonjs/gui";
-import { HPComponent } from "./HPComponent";
+import { HPComponent } from "../HPComponent";
 import { EnemyComponent } from "./EnemyComponent";
-import { EnemyDamageComponent } from "./EnemyDamageComponent";
-import { EnemyManager } from "./EnemyManager";
-import { CreateHealthBar } from "./CreateHealthBar";
+import { EnemyDamageComponent } from "../EnemyDamageComponent";
+import { EnemyManager } from "../EnemyManager";
+import { CreateHealthBar } from "../CreateHealthBar";
+import {ExperienceItemComponent} from "./ExperienceItemComponent";
 import {
     getAllComponents,
     addComponent,
     ComponentUpdateManager,
     Component
-} from "./ComponentSystem";
+} from "../ComponentSystem";
 
 export class EnemySpawnComponent extends Component {
     private lastSpawnTime = 0;
@@ -42,13 +43,16 @@ export class EnemySpawnComponent extends Component {
             enemyMesh.position = new BABYLON.Vector3(randomX, 0, randomZ);
             enemyMesh.computeWorldMatrix(true);
 
-            addComponent(enemyMesh, new EnemyComponent(enemyMesh, (this.scene as any).player.owner, 4, this.scene));
+           var enemyComponent = addComponent(enemyMesh, new EnemyComponent(enemyMesh, (this.scene as any).player.owner, 4, this.scene,10));
             addComponent(enemyMesh, new EnemyDamageComponent(enemyMesh, (this.scene as any).player, this.scene, 1));
             const healthBar = CreateHealthBar(this.scene, enemyMesh, "red");
 
             addComponent(enemyMesh, new HPComponent(enemyMesh, 10, () => {
                 console.log("Enemy died!");
+
                 this.destroyEnemy(enemyMesh);
+                enemyComponent.die();
+        
             }, healthBar));
 
             EnemyManager.getInstance().addEnemy(enemyMesh);

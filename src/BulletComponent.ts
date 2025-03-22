@@ -2,8 +2,8 @@ import * as BABYLON from "@babylonjs/core";
 import { Component } from "./ComponentSystem";
 import { ComponentUpdateManager, getComponent } from "./ComponentSystem";
 import { EnemyManager } from "./EnemyManager";
-import { AttachHitBox } from "./AttachHitBox";
-import { EnemyComponent } from "./EnemyComponent";
+import { AttachHitBox } from "./General/Function/AttachHitBox";
+import { EnemyComponent } from "./Enemy/EnemyComponent";
 import { HPComponent } from "./HPComponent";
 
 export class BulletComponent extends Component {

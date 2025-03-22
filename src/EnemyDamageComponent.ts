@@ -1,7 +1,7 @@
 import * as BABYLON from "@babylonjs/core";
 import { Component, ComponentUpdateManager } from "./ComponentSystem";
 import { PlayerComponent } from "./Player/PlayerComponent";
-import { EnemyComponent } from "./EnemyComponent";
+import { EnemyComponent } from "./Enemy/EnemyComponent";
 import { getComponent } from "./ComponentSystem";
 
 export class EnemyDamageComponent extends Component {

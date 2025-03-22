@@ -2,7 +2,7 @@ import * as BABYLON from "@babylonjs/core";
 import { Component } from "../ComponentSystem";
 import { CreateHealthBar } from "../CreateHealthBar";
 import { HPComponent } from "../HPComponent";
-import { AttachHitBox } from "../AttachHitBox";
+import { AttachHitBox } from "../General/Function/AttachHitBox";
 import { addComponent } from "../ComponentSystem";
 import { ComponentUpdateManager } from "../ComponentSystem";
 import { GameOverUI } from "../UI/GameOverUI";

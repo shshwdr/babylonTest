@@ -7,10 +7,12 @@ import { PlayerComponent } from "./Player/PlayerComponent";
 import { PlayerMovementComponent } from "./Player/PlayerMovementComponent";
 import { CameraFollowComponent } from "./CameraFollowComponent";
 import { AttackComponent } from "./Player/AttackComponent";
-import { EnemySpawnComponent } from "./EnemySpawnComponent";
+import { EnemySpawnComponent } from "./Enemy/EnemySpawnComponent";
 import { ComponentUpdateManager, addComponent } from "./ComponentSystem";
 import { GameLifecycleManager } from "./GameLifecycleManager";
 import { PauseMenuUI } from "./PauseMenuUI";
+import {createExperienceBar} from "./Player/Function/createExperienceBar";
+import { PlayerExperienceComponent } from "./Player/PlayerExperienceComponent";
 const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 const engine = new BABYLON.Engine(canvas);
 
@@ -43,6 +45,8 @@ groundMaterial.diffuseTexture = texture;
         addComponent(playerMesh, new CameraFollowComponent(playerMesh, camera, playerMesh));
         addComponent(playerMesh, new AttackComponent(playerMesh, 1));
 
+        const expBar = createExperienceBar(scene);
+const xpComponent = addComponent(playerMesh, new PlayerExperienceComponent(playerMesh, expBar));
         (scene as any).player = player;
     });
 
