@@ -13,6 +13,7 @@ import { GameLifecycleManager } from "./GameLifecycleManager";
 import { PauseMenuUI } from "./PauseMenuUI";
 import {createExperienceBar} from "./Player/Function/createExperienceBar";
 import { PlayerExperienceComponent } from "./Player/PlayerExperienceComponent";
+import { GameManager } from "./GameManager";
 const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 const engine = new BABYLON.Engine(canvas);
 
@@ -28,7 +29,7 @@ const createScene = async (): Promise<BABYLON.Scene> => {
   
    // groundMaterial.diffuseTexture.scale = 50;
     //groundMaterial.diffuseTexture.vScale = 50;
-    const texture = new BABYLON.Texture("/ground.jpg", scene);
+    const texture = new BABYLON.Texture("assets/ground.jpg", scene);
 texture.uScale = 50;
 texture.vScale = 50;
 groundMaterial.diffuseTexture = texture;
@@ -36,7 +37,7 @@ groundMaterial.diffuseTexture = texture;
     const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 1000, height: 1000, subdivisions: 100 }, scene);
     ground.material = groundMaterial;
 
-    BABYLON.SceneLoader.ImportMesh("", "./GLB format/", "character-female-a.glb", scene, (meshes) => {
+    BABYLON.SceneLoader.ImportMesh("", "./assets/", "character-female-a.glb", scene, (meshes) => {
         const playerMesh = meshes[0];
         playerMesh.position = new BABYLON.Vector3(0, 0, 0);
 
@@ -48,6 +49,8 @@ groundMaterial.diffuseTexture = texture;
         const expBar = createExperienceBar(scene);
 const xpComponent = addComponent(playerMesh, new PlayerExperienceComponent(playerMesh, expBar));
         (scene as any).player = player;
+        
+GameManager.getInstance().setPlayer(playerMesh, player);
     });
 
     const enemySpawnerNode = new BABYLON.TransformNode("enemySpawner", scene);
@@ -62,8 +65,12 @@ const xpComponent = addComponent(playerMesh, new PlayerExperienceComponent(playe
 
     return scene;
 };
-
-let scene = await  createScene();
+let scene
+async function init() {
+   scene = await createScene();
+  // Additional logic after scene is created
+}
+init();
 
 window.addEventListener("resize", () => {
     engine.resize();
@@ -83,9 +90,9 @@ export async function reloadScene(): Promise<void> {
   });
 }
 
-Inspector.Show(scene, {
+// Inspector.Show(scene, {
  
-});
+// });
 
 window.addEventListener("keydown", (ev) => {
   if (ev.key === "i") {

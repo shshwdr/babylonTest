@@ -38,12 +38,12 @@ export class EnemySpawnComponent extends Component {
         const randomX = Math.random() * distance - distance / 2;
         const randomZ = Math.random() * distance - distance / 2;
 
-        BABYLON.SceneLoader.ImportMesh("", "./GLB format/", "character-female-b.glb", this.scene, (meshes) => {
+        BABYLON.SceneLoader.ImportMesh("", "./assets/", "character-female-b.glb", this.scene, (meshes) => {
             const enemyMesh = meshes[0];
             enemyMesh.position = new BABYLON.Vector3(randomX, 0, randomZ);
             enemyMesh.computeWorldMatrix(true);
 
-           var enemyComponent = addComponent(enemyMesh, new EnemyComponent(enemyMesh, (this.scene as any).player.owner, 4, this.scene,10));
+           var enemyComponent = addComponent(enemyMesh, new EnemyComponent(enemyMesh, (this.scene as any).player.owner, 4, this.scene,5));
             addComponent(enemyMesh, new EnemyDamageComponent(enemyMesh, (this.scene as any).player, this.scene, 1));
             const healthBar = CreateHealthBar(this.scene, enemyMesh, "red");
 

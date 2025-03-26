@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@babylonjs/gui": "^7.53.3",
-    "oimo": "^1.0.9"
+    "oimo": "^1.0.9",
+    "papaparse": "^5.5.2"
   }
 }

@@ -8,7 +8,7 @@ import { ExperienceCollectorComponent } from  "../OtherBattleObject/ExperienceCo
 
 export class EnemyComponent extends Component {
     public hitbox: BABYLON.Mesh;
-
+    private speedModifier: number = 1.0;
     constructor(
         owner: BABYLON.TransformNode,
         private player: BABYLON.TransformNode,
@@ -20,10 +20,13 @@ export class EnemyComponent extends Component {
         this.hitbox = AttachHitBox(owner, BABYLON.Vector3.One(), scene);
         ComponentUpdateManager.getInstance().register(this);
     }
-
+    public setSpeedModifier(factor: number): void {
+        this.speedModifier = factor;
+    }
+    
     public update(deltaTime: number): void {
         const direction = this.calculateDirection();
-        const velocity = direction.scale(this.speed * deltaTime);
+        const velocity = direction.scale(this.speed* this.speedModifier * deltaTime);
         this.owner.position.addInPlace(velocity);
     }
 
@@ -42,7 +45,7 @@ export class EnemyComponent extends Component {
     }
 
     public die(): void {
-        const expMesh = BABYLON.MeshBuilder.CreateBox("expItem", { size: 0.1 }, this.scene);
+        const expMesh = BABYLON.MeshBuilder.CreateBox("expItem", { size: 0.3 }, this.scene);
     expMesh.position = this.owner.position.clone();
     expMesh.position.y = 0.5;
 

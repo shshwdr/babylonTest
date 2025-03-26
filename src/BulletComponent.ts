@@ -15,11 +15,13 @@ export class BulletComponent extends Component {
     private maxLifeTime: number = 10;
     private velocity!: BABYLON.Vector3;
     private hitbox!: BABYLON.Mesh;
+    private attack: number;
 
     constructor(
         owner: BABYLON.TransformNode,
         direction: BABYLON.Vector3,
         speed: number,
+        attack: number,
         attacker: BABYLON.TransformNode,
         scene: BABYLON.Scene
     ) {
@@ -27,6 +29,7 @@ export class BulletComponent extends Component {
         this.direction = direction;
         this.speed = speed;
         this.attacker = attacker;
+        this.attack = attack;
         this.scene = scene;
 
         ComponentUpdateManager.getInstance().register(this);
@@ -59,7 +62,7 @@ var hpComponent = getComponent<HPComponent>(enemy, HPComponent)
             const bounding = enemyComponent?.hitbox;
            // const hpComponent = enemyComponent.hpComponent;
             if (bounding && this.hitbox.intersectsMesh(bounding, false)) {
-                hpComponent?.takeDamage?.(5);
+                hpComponent?.takeDamage?.(this.attack);
                 this.destroy();
             }
         });

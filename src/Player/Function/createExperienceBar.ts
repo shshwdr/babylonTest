@@ -9,7 +9,7 @@ export function createExperienceBar(scene: BABYLON.Scene): ProgressBarComponent 
     const container = new GUI.Rectangle();
     container.width = "60%";
     container.height = "20px";
-    container.top = "-48%"; // 顶部显示
+    container.top = "10px"; // 顶部显示
     container.thickness = 1;
     container.color = "white";
     container.background = "black";

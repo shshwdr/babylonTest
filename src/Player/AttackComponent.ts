@@ -3,6 +3,8 @@ import { Component } from "../ComponentSystem";
 import { ComponentUpdateManager, getComponent } from "../ComponentSystem";
 import { BulletComponent } from "../BulletComponent";
 import { PlayerComponent } from "../Player/PlayerComponent";
+import { BulletModifierComponent } from "../Skills/BulletModifierComponent";
+import { getAllComponents } from "../ComponentSystem";
 
 export class AttackComponent extends Component {
     private interval: number;
@@ -34,8 +36,16 @@ export class AttackComponent extends Component {
          var worldPos =this.owner.getAbsolutePosition();
         bulletNode.position = worldPos.add(new BABYLON.Vector3(0, 0.5, 0));
 
+var damage = 5;
+        const modifiers = getAllComponents(this.owner, BulletModifierComponent);
+        modifiers.forEach(modifier => {
+            
+if (modifier) {
+    damage *= modifier.getDamageMultiplier();
+}
+        });
         //bulletNode.position = this.owner.position.clone().add(new BABYLON.Vector3(0, 0.5, 0));
-        new BulletComponent(bulletNode, direction, 10, this.owner, this.owner.getScene());
+        new BulletComponent(bulletNode, direction, 10,damage, this.owner, this.owner.getScene());
     }
 
     private calculateDirection(mousePos: BABYLON.Vector3): BABYLON.Vector3 {

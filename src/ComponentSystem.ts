@@ -9,30 +9,51 @@ export abstract class Component {
 }
 
 // 使用 WeakMap 维护每个 node 挂载的组件
-const componentMap = new WeakMap<BABYLON.TransformNode, Map<Function, Component>>();
-
+const componentMap = new WeakMap<BABYLON.TransformNode, Map<Function, Component[]>>();
 export function addComponent<T extends Component>(node: BABYLON.TransformNode, component: T): T {
     let map = componentMap.get(node);
     if (!map) {
         map = new Map();
         componentMap.set(node, map);
     }
-    map.set(component.constructor, component);
+
+    const type = component.constructor;
+    if (!map.has(type)) {
+        map.set(type, []);
+    }
+    map.get(type)!.push(component);
     return component;
 }
 
-export function getComponent<T extends Component>(node: BABYLON.TransformNode, type: new (...args: any[]) => T): T | undefined {
+export function getComponent<T extends Component>(
+    node: BABYLON.TransformNode,
+    type: new (...args: any[]) => T
+  ): T | undefined {
     const map = componentMap.get(node);
-    return map?.get(type) as T | undefined;
-}
+    const components = map?.get(type) as T[] | undefined;
+    return components?.[0];
+  }
+  
 
-export function removeComponent<T extends Component>(node: BABYLON.TransformNode, type: new (...args: any[]) => T): void {
+  export function removeComponent<T extends Component>(
+    node: BABYLON.TransformNode,
+    type: new (...args: any[]) => T
+  ): void {
     const map = componentMap.get(node);
-    map?.delete(type);
-}
+    const components = map?.get(type);
+    if (components) {
+      components.forEach(c => c.destroy?.());
+      map!.delete(type);
+    }
+  }
+  
 
-export function getAllComponents(node: BABYLON.TransformNode): Component[] {
-    return Array.from(componentMap.get(node)?.values() ?? []);
+export function getAllComponents<T extends Component>(
+    node: BABYLON.TransformNode,
+    type: new (...args: any[]) => T
+): T[] {
+    const map = componentMap.get(node);
+    return (map?.get(type) as T[]) ?? [];
 }
 
 // 可选：统一 update 调度器（类似 Unity Update）
