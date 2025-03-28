@@ -1,1 +1,0 @@
-declare var BABYLON: typeof import("@babylonjs/core");
