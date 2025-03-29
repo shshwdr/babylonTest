@@ -28,6 +28,8 @@ class GameManager {
   private  currentCharacterChoice = "cat";
   private gameStarted = false;
   private isThrowing = false;
+  private isColliding = false;
+  private isGameOver = false;
   constructor(private scene: BABYLON.Scene) {}
 
   public async showMainMenu(): Promise<"cat" | "dog"> {
@@ -100,10 +102,10 @@ class GameManager {
     
    this.scene.debugLayer.show({ embedMode: true });
     this.ui = GUI.AdvancedDynamicTexture.CreateFullscreenUI("GameUI", true, this.scene);
-
-    const playerSprite = this.createCharacterSprite(`assets/${playerType.toUpperCase()}.png`, -5);
+   var characterDis = 8;
+    const playerSprite = this.createCharacterSprite(`assets/${playerType.toUpperCase()}.png`, -characterDis);
     const enemyType = playerType === "cat" ? "DOG" : "CAT";
-    const enemySprite = this.createCharacterSprite(`assets/${enemyType}.png`, 5);
+    const enemySprite = this.createCharacterSprite(`assets/${enemyType}.png`, characterDis);
 
     this.playerNode = playerSprite;
     this.enemyNode = enemySprite;
@@ -115,7 +117,7 @@ class GameManager {
     this.enemyNode.physicsImpostor!.physicsBody.collisionFilterMask = 0xFF;
 
 
-    this.wall = BABYLON.MeshBuilder.CreateBox("wall", { width: 0.5, height: 5 }, this.scene);
+    this.wall = BABYLON.MeshBuilder.CreateBox("wall", { width: 0.5, height: 3 }, this.scene);
     this.wall.position.x = 0;
 
     this.wall.physicsImpostor = new BABYLON.PhysicsImpostor(
@@ -128,8 +130,8 @@ class GameManager {
     const wallBody = this.wall!.physicsImpostor!.physicsBody;
 wallBody.collisionFilterGroup = 0x08;
 wallBody.collisionFilterMask = 0xFFFF;
-    addComponent(playerSprite, new HPComponent(playerSprite, 3, () => this.onDeath("enemy")));
-    addComponent(enemySprite, new HPComponent(enemySprite, 3, () => this.onDeath("player")));
+    addComponent(playerSprite, new HPComponent(playerSprite, 3, () => this.onDeath("player")));
+    addComponent(enemySprite, new HPComponent(enemySprite, 3, () => this.onDeath("enemy")));
 
     this .ground = this.createGround();
     this.ground.physicsImpostor!.physicsBody.collisionFilterGroup = 0x10;
@@ -324,7 +326,6 @@ this.enemyHPFill = enemyHPFill;
       this.charging = false;
       const powerRatio = Math.min(this.chargeTime / maxCharge, 1);
       this.throwProjectile(powerRatio,this.currentCharacterChoice);
-      this.isThrowing = true;
     };
   
     // 修复：绑定外部 this 引用
@@ -332,7 +333,8 @@ this.enemyHPFill = enemyHPFill;
     class ChargeBarComponent extends Component {
       update(dt: number): void {
         if (!manager.charging || !manager.powerBarInner) return;
-        manager.chargeTime += (manager.increasing ? 1 : -1) * dt;
+        var chargeSpeed = 2;
+        manager.chargeTime += (manager.increasing ? 1 : -1) * dt * chargeSpeed;
         if (manager.chargeTime > maxCharge) {
           manager.chargeTime = maxCharge;
           manager.increasing = false;
@@ -351,6 +353,7 @@ this.enemyHPFill = enemyHPFill;
   private throwProjectile(strength: number,character:string) {
     if (!this.playerNode || !this.enemyNode) return;
 
+    this.isThrowing = true;
     const thrower = this.isPlayerTurn ? this.playerNode : this.enemyNode;
     const throwMat = thrower.material as BABYLON.StandardMaterial;
 const actionTex = new BABYLON.Texture(`assets/${character.toUpperCase()}_Throw.png`, this.scene);
@@ -388,7 +391,7 @@ originalTex.hasAlpha = true;
     plane.checkCollisions = true;
     
     const dir = this.isPlayerTurn ? 1 : -1
-    var force =  8 + strength * 10 + this.windForce;
+    var force =  10 + strength * 15 + this.windForce;
     force= force*0.5
     plane.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(dir * force, force, 0));
     const group = 0x04; // 任意未占用组
@@ -412,14 +415,24 @@ originalTex.hasAlpha = true;
       const target = (collided.object as unknown) as BABYLON.TransformNode;
       // const node = collided.object as BABYLON.TransformNode;
 
-      if (target === thrower) return;
+      if(this.isColliding){
+
+      }else{
+        if (target === thrower) return;
+
       const hp = getComponent(target, HPComponent);
       if (hp) {
         hp.takeDamage(1);
         this.updateHPDisplay();
       }
+
+      this.isColliding = true;
+      setTimeout(() => {
       plane.dispose();
       this.nextTurn();
+        }, 1000);
+      }
+      
     });
 
   // const velocity = dir.scale(force);
@@ -482,7 +495,8 @@ throwMat.diffuseTexture = actionTex;
 
     if (this.turnText) this.turnText.text = this.isPlayerTurn ? "You turn" : "Enemy turn";
     this.isThrowing = false;
-    if (!this.isPlayerTurn) {
+    this.isColliding = false;
+    if (!this.isPlayerTurn && !this.isThrowing) {
       setTimeout(() => {
         const strength = Math.random();
         this.throwProjectile(strength,this.enemyName());
@@ -505,6 +519,8 @@ throwMat.diffuseTexture = actionTex;
     text.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER;
     text.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
     ui.addControl(text);
+    this.isGameOver = true;
+    this.scene.getEngine().stopRenderLoop();
   }
 }
 
