@@ -1,6 +1,7 @@
 // CatVsDogGame.ts - 增加背景贴图、风力指示、回合显示、力度条与投掷逻辑改进
 import * as BABYLON from "@babylonjs/core";
 import * as GUI from "@babylonjs/gui";
+import guiData from '../public/assets/Frame1.json';
 import { Component, addComponent, getComponent, ComponentUpdateManager } from "./ComponentSystem";
 
 class GameManager {
@@ -24,6 +25,7 @@ class GameManager {
   private chargeTime: number = 0;
   private charging = false;
   private increasing = true;
+  public throwButton?:GUI.Button;
 
   private  currentCharacterChoice = "cat";
   private gameStarted = false;
@@ -100,7 +102,7 @@ class GameManager {
   public start(playerType: "cat" | "dog") {
     this.createBackground();
     
-   this.scene.debugLayer.show({ embedMode: true });
+   //this.scene.debugLayer.show({ embedMode: true });
     this.ui = GUI.AdvancedDynamicTexture.CreateFullscreenUI("GameUI", true, this.scene);
    var characterDis = 8;
     const playerSprite = this.createCharacterSprite(`assets/${playerType.toUpperCase()}.png`, -characterDis);
@@ -227,10 +229,11 @@ this.windRightBar = windRightBar;
   }
 
   private createHUD() {
+
     if (!this.ui) return;
 
     this.turnText = new GUI.TextBlock("turn", "Your Turn");
-    this.turnText.color = "white";
+    this.turnText.color = "black";
     this.turnText.fontSize = 28;
     this.turnText.top = "0";
     this.turnText.textHorizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
@@ -238,7 +241,7 @@ this.windRightBar = windRightBar;
     this.ui.addControl(this.turnText);
 
     this.windText = new GUI.TextBlock("wind", "Wind");
-    this.windText.color = "white";
+    this.windText.color = "black";
     this.windText.fontSize = 24;
     this.windText.top = "50";
     this.windText.textHorizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
@@ -269,6 +272,17 @@ this.windRightBar = windRightBar;
     this.powerBarInner = inner;
 
     // 玩家 HP 条（左侧）
+
+
+    const  playerHPText = new GUI.TextBlock("playerhp", "Player HP");
+    playerHPText.color = "black";
+    playerHPText.fontSize = 24;
+    playerHPText.top = "0px";
+    playerHPText.left = "10px";
+    playerHPText.textHorizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+    playerHPText.textVerticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+    this.ui.addControl(playerHPText);
+
 const playerHPBar = new GUI.Rectangle();
 playerHPBar.width = "100px";
 playerHPBar.height = "20px";
@@ -277,7 +291,7 @@ playerHPBar.thickness = 1;
 playerHPBar.background = "black";
 playerHPBar.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
 playerHPBar.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
-playerHPBar.top =  "0px";
+playerHPBar.top =  "100px";
 playerHPBar.left = "10px";
 this.ui.addControl(playerHPBar);
 
@@ -290,6 +304,17 @@ playerHPBar.addControl(playerHPFill);
 this.playerHPFill = playerHPFill;
 
 // 敌人 HP 条（右侧）
+
+
+const  enemyHPText = new GUI.TextBlock("enemyhp", "Enemy HP");
+enemyHPText.color = "black";
+enemyHPText.fontSize = 24;
+enemyHPText.top = "0px";
+enemyHPText.left = "-10px";
+enemyHPText.textHorizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+enemyHPText.textVerticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+this.ui.addControl(enemyHPText);
+
 const enemyHPBar = new GUI.Rectangle();
 enemyHPBar.width = "100px";
 enemyHPBar.height = "20px";
@@ -298,7 +323,7 @@ enemyHPBar.thickness = 1;
 enemyHPBar.background = "black";
 enemyHPBar.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
 enemyHPBar.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
-enemyHPBar.top =  "0px";
+enemyHPBar.top =  "100px";
 enemyHPBar.left = "-10px";
 this.ui.addControl(enemyHPBar);
 
@@ -314,19 +339,19 @@ this.enemyHPFill = enemyHPFill;
   private registerInput() {
     const maxCharge = 2;
   
-    this.scene.onPointerDown = () => {
+    this.throwButton!.onPointerDownObservable.add(() => {
       if (!this.isPlayerTurn || !this.gameStarted || this.isThrowing) return;
       this.charging = true;
       this.chargeTime = 0;
       this.increasing = true;
-    };
+    });
   
-    this.scene.onPointerUp = () => {
+    this.throwButton!.onPointerUpObservable.add(() => {
       if (!this.isPlayerTurn || !this.charging || !this.gameStarted || this.isThrowing) return;
       this.charging = false;
       const powerRatio = Math.min(this.chargeTime / maxCharge, 1);
       this.throwProjectile(powerRatio,this.currentCharacterChoice);
-    };
+    });
   
     // 修复：绑定外部 this 引用
     const manager = this;
@@ -604,6 +629,99 @@ export async function createScene(engine: BABYLON.Engine): Promise<BABYLON.Scene
     const choice = await manager.showMainMenu();
     manager.start(choice);
   }, 0);
+
+// 创建 AdvancedDynamicTexture
+// let advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+// function createResponsiveUI(advancedTexture: GUI.AdvancedDynamicTexture, designAspect: number = 9 / 16) {
+//   // 创建主容器（UI 内容都放进去）
+//   const container = new GUI.Rectangle("MainContainer");
+//   container.thickness = 0;
+//   container.height = "100%";
+//   container.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+//   container.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+
+//   // 将 container 添加到 UI 上
+//   advancedTexture.addControl(container);
+
+//   // 每帧动态更新宽度，使其保持等比
+//   //advancedTexture.getScene().onBeforeRenderObservable.add(() => {
+//     const screenWidth = advancedTexture.getSize().width;
+//     const screenHeight = advancedTexture.getSize().height;
+
+//     const actualAspect = screenWidth / screenHeight;
+//     let targetWidthPercent = 1;
+
+//     if (actualAspect > designAspect) {
+//       // 屏幕太宽了，按高度撑满，高度 = 100%，宽度 < 100%
+//       targetWidthPercent = designAspect / actualAspect;
+//     } else {
+//       // 屏幕正常，不需要缩放
+//       targetWidthPercent = 1;
+//     }
+
+//     container.width = `${targetWidthPercent * 100}%`;
+//  // });
+
+//   return container;
+// }
+
+// // 绑定到 canvas resize，再强制刷新尺寸（手动模拟）
+// function forceRefreshAdvancedTexture() {
+//   const screenWidth = engine.getRenderWidth();
+//   const screenHeight = engine.getRenderHeight();
+  
+//   const targetAspect = 16 / 9; // UI设计比例
+
+//   // 高度占满
+//   const uiHeight = screenHeight;
+//   const uiWidth = screenHeight * targetAspect; // 宽度根据比例推算
+
+//   // 缩放 AdvancedDynamicTexture 显示区域
+//   advancedTexture.scaleTo(uiWidth, uiHeight);
+
+//   // 把整个 UI 水平居中显示（如果太宽了，就左右偏移）
+//   const offsetX = (screenWidth - uiWidth) / 2;
+//   advancedTexture.rootContainer.left = `${offsetX}px`;
+//   advancedTexture.rootContainer.top = `0px`; // 顶部对齐
+
+//   // 刷新 GUI
+//   advancedTexture.markAsDirty();
+// }
+// setTimeout(() => {
+//   // 解析加载的 GUI 数据
+//   advancedTexture.parseSerializedObject(guiData, true);
+//  // createResponsiveUI(advancedTexture)
+//   const screenHeight = engine.getRenderHeight();
+//  // advancedTexture.idealWidth =393; // 你的 UI 设计高度（例如 1080）
+// advancedTexture.idealHeight = 852; // 你的 UI 设计宽度（例如 1920）【注意：高度优先】
+
+// const root = advancedTexture.rootContainer.children[0] as GUI.Control;
+// root.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+// //root.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+
+// advancedTexture.renderAtIdealSize = true; // 自动按比例适配 canvas，居中显示
+//   // 遍历 rootContainer.children 获取所有的控件
+//   advancedTexture.rootContainer.children.forEach(control => {
+//       // 找到 Button-bjs 按钮
+//       if (control.name === "Button-bjs" && control instanceof GUI.Button) {
+//           console.log("Found Button-bjs:", control);
+  
+//           manager.throwButton = control;
+  
+//           // 找到按钮上的文本并更改
+//           if (control.children.length > 0) {
+//             control.children.forEach(child => {
+//                 if (child instanceof GUI.TextBlock) {
+//                     console.log("Found Text inside Button-bjs:", child);
+//                     child.text = "Throw";  // 修改文本
+//                 }
+//             });
+//           }
+//       }
+//   });
+//  // forceRefreshAdvancedTexture();
+// }, 500);
 
   return scene;
 }
