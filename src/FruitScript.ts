@@ -8,6 +8,7 @@ export class FruitScript extends Component {
   private body: BABYLON.PhysicsBody | null = null;
   public sphere: BABYLON.Mesh | null = null;
   public isMerged:boolean = false;
+  public spritePlane: BABYLON.Mesh | null = null;
   
 
   constructor(owner: BABYLON.TransformNode, fruitName: string) {
@@ -20,38 +21,64 @@ export class FruitScript extends Component {
   private setupVisualAndPhysics(): void {
     const scene = this.owner.getScene();
     const info = GameSettings.getFruitInfo(this.fruitName);
-
-    const sphere = BABYLON.MeshBuilder.CreateSphere("fruit", { diameter: info.radius * 2 }, scene);
+  
+    // ✅ 1. 创建用于物理碰撞的隐藏球体
+    const sphere = BABYLON.MeshBuilder.CreateSphere("fruitCollider", {
+      diameter: info.radius * 2
+    }, scene);
+    sphere.isVisible = false; // 不显示
+    this.sphere = sphere;
+    
     sphere.position = this.owner.position.clone();
-    //sphere.parent = this.owner;
-    this.sphere = sphere
-
+  
+    // ✅ 2. 创建用于渲染的 2D 平面
+    const plane = BABYLON.MeshBuilder.CreatePlane("fruitSprite", {
+      size: info.radius * 2
+    }, scene);
+    plane.position = this.owner.position.clone();
+    plane.rotationQuaternion = BABYLON.Quaternion.Identity(); // ✅ 显式初始化
+plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_NONE;
+    this.spritePlane = plane;
+  
     const mat = new BABYLON.StandardMaterial("mat", scene);
-    //mat.diffuseTexture = new BABYLON.Texture(`/textures/${this.fruitName}.png`, scene);
     mat.diffuseTexture = new BABYLON.Texture(`/textures/cherry.png`, scene);
-    sphere.material = mat;
-
+    mat.diffuseTexture.hasAlpha = true;
+    mat.emissiveColor = new BABYLON.Color3(1, 1, 1);
+    mat.backFaceCulling = false;
+    plane.material = mat;
+  
+    // ✅ 3. 创建物理体
     sphere.physicsImpostor = new BABYLON.PhysicsImpostor(
-        sphere,
-        BABYLON.PhysicsImpostor.SphereImpostor,
-        {
-          mass: 0,
-          restitution: 0.2,      // 弹性小点
-          friction: 1,           // 增加摩擦
-         // angularDamping: 0.4,   // 限制旋转惯性
-         // linearDamping: 0.2,    // 限制水平滑动
-        },
-        scene
-      );
-    // 当物体开始掉落前
-sphere.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(0, 0, 0));
-
-// 限制刚体只能左右滚 + 下落（无 Z 轴变化）
-sphere.physicsImpostor.registerBeforePhysicsStep(() => {
-  const vel = sphere.physicsImpostor!.getLinearVelocity();
-  sphere.physicsImpostor!.setLinearVelocity(new BABYLON.Vector3(vel!.x, vel!.y, 0));
-});
+      sphere,
+      BABYLON.PhysicsImpostor.SphereImpostor,
+      {
+        mass: 0,
+        restitution: 0.2,
+        friction: 0.1
+      },
+      scene
+    );
+  
+    // ✅ 4. 禁止 Z 方向移动
+    sphere.physicsImpostor.setLinearVelocity(BABYLON.Vector3.Zero());
+    sphere.physicsImpostor.registerBeforePhysicsStep(() => {
+      const vel = sphere.physicsImpostor!.getLinearVelocity();
+      sphere.physicsImpostor!.setLinearVelocity(new BABYLON.Vector3(vel!.x, vel!.y, 0));
+    });
   }
+
+  update(): void {
+    if (!this.sphere || !this.spritePlane) return;
+  
+    // 同步位置
+    this.spritePlane.position.copyFrom(this.sphere.position);
+  
+    // 同步旋转
+    if (this.sphere.rotationQuaternion && this.spritePlane.rotationQuaternion) {
+      this.spritePlane.rotationQuaternion.copyFrom(this.sphere.rotationQuaternion);
+    }
+  }
+  
   public startFalling(): void {
     if (!this.sphere?.physicsImpostor) return;
   
@@ -69,12 +96,28 @@ sphere.physicsImpostor.registerBeforePhysicsStep(() => {
       if (next) {
         this.isMerged = true;
         other.isMerged = true;
+        
+        // 计算碰撞点位置
+        const collisionPoint = BABYLON.Vector3.Lerp(
+          this.sphere!.position,
+          other.sphere!.position,
+          0.5
+        );
+        
+        // 获取新球的半径
+        const newRadius = GameSettings.getFruitInfo(next.name).radius;
+        // 将新球的位置提高一个半径的高度
+        collisionPoint.y += newRadius;
+        
         this.destroy();
         other.destroy();
 
-        
-        const mergePos = BABYLON.Vector3.Center(this.owner.position, other.owner.position);
-        FruitManager.spawnFruitMerge(next.name, mergePos);
+        // 生成新球时设置一些物理属性来减少弹跳
+        const newFruit = FruitManager.spawnFruitMerge(next.name, collisionPoint);
+        if (newFruit.sphere?.physicsImpostor) {
+          newFruit.sphere.physicsImpostor.setLinearVelocity(BABYLON.Vector3.Zero());
+          newFruit.sphere.physicsImpostor.setAngularVelocity(BABYLON.Vector3.Zero());
+        }
 
         FruitManager.addScore(next.score);
       }
@@ -84,9 +127,11 @@ sphere.physicsImpostor.registerBeforePhysicsStep(() => {
   destroy(): void {
     this.sphere?.dispose();
     this.body?.dispose();
-    this.owner.dispose();
+    this.spritePlane?.dispose();
+this.owner.dispose();
   }
   public getMesh(): BABYLON.Mesh {
-    return this.sphere!;
-  }
+        return this.sphere!;
+    
+       }
 }
