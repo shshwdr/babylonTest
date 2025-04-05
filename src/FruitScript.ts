@@ -9,7 +9,6 @@ export class FruitScript extends Component {
   public sphere: BABYLON.Mesh | null = null;
   public isMerged:boolean = false;
   public spritePlane: BABYLON.Mesh | null = null;
-  
 
   constructor(owner: BABYLON.TransformNode, fruitName: string) {
     super(owner);
@@ -41,7 +40,7 @@ plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_NONE;
     this.spritePlane = plane;
   
     const mat = new BABYLON.StandardMaterial("mat", scene);
-    mat.diffuseTexture = new BABYLON.Texture(`/textures/cherry.png`, scene);
+    mat.diffuseTexture = new BABYLON.Texture(`/textures/${info.name}.png`, scene);
     mat.diffuseTexture.hasAlpha = true;
     mat.emissiveColor = new BABYLON.Color3(1, 1, 1);
     mat.backFaceCulling = false;
@@ -91,38 +90,46 @@ plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_NONE;
   }
   
   public onCollision(other: FruitScript): void {
-    if (other.fruitName === this.fruitName) {
-      const next = GameSettings.nextFruit(this.fruitName);
-      if (next) {
-        this.isMerged = true;
-        other.isMerged = true;
-        
-        // 计算碰撞点位置
-        const collisionPoint = BABYLON.Vector3.Lerp(
-          this.sphere!.position,
-          other.sphere!.position,
-          0.5
-        );
-        
-        // 获取新球的半径
-        const newRadius = GameSettings.getFruitInfo(next.name).radius;
-        // 将新球的位置提高一个半径的高度
-        collisionPoint.y += newRadius;
-        
-        this.destroy();
-        other.destroy();
-
-        // 生成新球时设置一些物理属性来减少弹跳
-        const newFruit = FruitManager.spawnFruitMerge(next.name, collisionPoint);
-        if (newFruit.sphere?.physicsImpostor) {
-          newFruit.sphere.physicsImpostor.setLinearVelocity(BABYLON.Vector3.Zero());
-          newFruit.sphere.physicsImpostor.setAngularVelocity(BABYLON.Vector3.Zero());
-        }
-
-        FruitManager.addScore(next.score);
-      }
+    if (this.isMerged || other.isMerged) return;
+    if (other.fruitName !== this.fruitName) return;
+  
+    const next = GameSettings.nextFruit(this.fruitName);
+    if (!next) return;
+  
+    this.isMerged = true;
+    other.isMerged = true;
+  
+    // 1. 计算两个球之间的中点
+    const collisionPoint = BABYLON.Vector3.Lerp(
+      this.sphere!.position,
+      other.sphere!.position,
+      0.5
+    );
+  
+    // 2. 向上偏移（避免立刻压住）
+    const newRadius = GameSettings.getFruitInfo(next.name).radius;
+    collisionPoint.y += newRadius;
+  
+    // 3. 向场景中心稍微偏移（避免贴边撞墙）
+    const centerOffsetDir = new BABYLON.Vector3(0, 0, 0).subtract(collisionPoint).normalize();
+    const inwardOffset = 0.3; // ← 可调数值，越大越靠中心
+    collisionPoint.addInPlace(centerOffsetDir.scale(inwardOffset));
+  
+    // 4. 销毁原来的
+    this.destroy();
+    other.destroy();
+  
+    // 5. 生成新水果
+    const newFruit = FruitManager.spawnFruitMerge(next.name, collisionPoint);
+    if (newFruit.sphere?.physicsImpostor) {
+      newFruit.sphere.physicsImpostor.setLinearVelocity(BABYLON.Vector3.Zero());
+      newFruit.sphere.physicsImpostor.setAngularVelocity(BABYLON.Vector3.Zero());
     }
+  
+    // 6. 加分
+    FruitManager.addScore(next.score);
   }
+  
 
   destroy(): void {
     this.sphere?.dispose();

@@ -21,25 +21,35 @@ export class DragController extends Component {
     // 注册 pointer up
     this.scene.onPointerObservable.add(this.onPointerUp, BABYLON.PointerEventTypes.POINTERUP);
   }
-
-  update(): void { 
-    if (!FruitManager.currentFruit || !this.isDragging|| !this.hasStartedDrag) return;
+  update(): void {
+    if (!FruitManager.currentFruit || !this.isDragging || !this.hasStartedDrag) return;
   
-    const pointerX = this.scene.pointerX;
-    const screenWidth = this.engine.getRenderWidth();
-    const orthoWidth = GameSettings.boxSize;
+    const camera = this.scene.activeCamera as BABYLON.FreeCamera;
+  
+    if (camera.mode === BABYLON.Camera.ORTHOGRAPHIC_CAMERA) {
+      const orthoLeft = camera.orthoLeft!;
+      const orthoRight = camera.orthoRight!;
+      const pointerX = this.scene.pointerX;
+      const screenWidth = this.engine.getRenderWidth();
+  
+      const ratio = pointerX / screenWidth;
+      const worldX = BABYLON.Scalar.Lerp(orthoLeft, orthoRight, ratio);
+  
+      const sphere = FruitManager.currentFruit.sphere;
+      if (sphere) {
+        
+    const radius = GameSettings.getFruitInfo(FruitManager.currentFruit.fruitName).radius;
+    // ✅ 基于你实际场景的左右墙位置
+    const minX = -5 + radius;
+    const maxX = 5 - radius;
+    const clampedX = BABYLON.Scalar.Clamp(worldX, minX, maxX);
+        sphere.position.x = clampedX;
+        sphere.position.y = GameSettings.boxSize / 2 - 1;
 
-    const ratioX = pointerX / screenWidth; // [0 ~ 1]
-    const worldX = -orthoWidth / 2 + ratioX * orthoWidth;
-
-    // 直接更新球的位置
-    const sphere = FruitManager.currentFruit.sphere;
-    if (sphere) {
-      sphere.position.x = worldX;
-      // 保持y轴位置不变
-      sphere.position.y = GameSettings.boxSize / 2 - 1;
+      }
     }
   }
+  
   
 
   private onPointerUp = (eventData: BABYLON.PointerInfo) => {

@@ -32,6 +32,11 @@ export class FruitManager {
     const script = new FruitScript(node, name);
     script.startFalling();
     addComponent(node, script);
+    script.isMerged = true;
+    setTimeout(() => {
+      script.isMerged = false;
+        }, 200);
+      
     return script; // ✅ 返回 script
   }
 
@@ -55,6 +60,6 @@ export class FruitManager {
 }
 
 function randomFruit(): string {
-  const list = GameSettings.fruitData.slice(0, 1); // cherry to lemon
+  const list = GameSettings.fruitData.slice(0, 4); // cherry to lemon
   return list[Math.floor(Math.random() * list.length)].name;
 }

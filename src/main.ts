@@ -36,10 +36,6 @@ window.addEventListener("keydown", (event) => {
 export async function reloadScene(): Promise<void> {
   init()
 }
-Inspector.Show(scene, {
+// Inspector.Show(scene, {
  
-});
-
-window.addEventListener("resize", () => {
-  engine.resize();
-});
+// });

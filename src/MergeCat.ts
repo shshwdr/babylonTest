@@ -18,6 +18,26 @@ const scene = new BABYLON.Scene(engine);
 const camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(0, 0, -100), scene);
 camera.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
 
+
+window.addEventListener("resize", () => {
+  engine.resize();
+  updateOrthoCamera(camera);
+});
+setTimeout(() => {
+  engine.resize();
+  updateOrthoCamera(camera);
+}, 100);
+function updateOrthoCamera(camera: BABYLON.FreeCamera) {
+  const aspect = engine.getRenderWidth() / engine.getRenderHeight();
+  const baseHeight = GameSettings.boxSize;
+  const baseWidth = baseHeight * aspect;
+
+  camera.orthoLeft = -baseWidth / 2;
+  camera.orthoRight = baseWidth / 2;
+  camera.orthoTop = baseHeight / 2;
+  camera.orthoBottom = -baseHeight / 2;
+}
+
 const halfSize = GameSettings.boxSize ;
 
 camera.orthoLeft = -halfSize;
@@ -62,7 +82,7 @@ return scene;
 
 function createBoundary(scene: BABYLON.Scene) {
     const ground = BABYLON.MeshBuilder.CreateBox("ground", { width: 10, height: 1, depth: 1 }, scene);
-    ground.position = new BABYLON.Vector3(0, -5.5, 0);
+    ground.position = new BABYLON.Vector3(0, -5, 0);
     ground.physicsImpostor = new BABYLON.PhysicsImpostor(
       ground, BABYLON.PhysicsImpostor.BoxImpostor,
       { mass: 0, restitution: 0.8 }, scene
