@@ -11,7 +11,7 @@
   "devDependencies": {
     "@babylonjs/core": "^7.53.3",
     "@babylonjs/inspector": "^7.53.3",
-    "@babylonjs/loaders": "^7.53.3",
+    "@babylonjs/loaders": "^7.54.3",
     "@types/node": "^22.13.17",
     "json-loader": "^0.5.7",
     "typescript": "^5.8.2",
@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@babylonjs/gui": "^7.53.3",
+    "ammo.js": "^0.0.10",
     "oimo": "^1.0.9",
     "papaparse": "^5.5.2"
   }

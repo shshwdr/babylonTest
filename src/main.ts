@@ -1,5 +1,5 @@
 import * as BABYLON from "@babylonjs/core";
-import { createScene }  from "./CatVsDogGame";
+import { createScene }  from "./MergeCat";
 import { ComponentUpdateManager } from "./ComponentSystem";
 import { Inspector } from "@babylonjs/inspector";
 
@@ -36,6 +36,10 @@ window.addEventListener("keydown", (event) => {
 export async function reloadScene(): Promise<void> {
   init()
 }
-// Inspector.Show(scene, {
+Inspector.Show(scene, {
  
-// });
+});
+
+window.addEventListener("resize", () => {
+  engine.resize();
+});
