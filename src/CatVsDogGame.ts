@@ -560,51 +560,6 @@ class HPComponent extends Component {
     if (this.hp <= 0) this.onDeath();
   }
 }
-
-// class ProjectileComponent extends Component {
-//   private velocity: BABYLON.Vector3;
-//   private gravity = -9.8;
-//   private onHit: (hit: BABYLON.TransformNode | null) => void;
-//   private life = 3;
-
-//   constructor(node: BABYLON.TransformNode, velocity: BABYLON.Vector3, onHit: (hit: BABYLON.TransformNode | null) => void) {
-//     super(node);
-//     this.velocity = velocity;
-//     this.onHit = onHit;
-//     ComponentUpdateManager.getInstance().register(this);
-//   }
-
-//   update(dt: number): void {
-//     this.velocity.y += this.gravity * dt;
-//     this.owner.position.addInPlace(this.velocity.scale(dt));
-//     this.life -= dt;
-
-//     if (this.life <= 0) {
-//       this.onHit(null);
-//       this.destroy();
-//     }
-
-//     const hitTest = ["player", "enemy", "wall", "ground"];
-//     for (const name of hitTest) {
-//       const node = this.owner.getScene().getTransformNodeByName(name);
-//       if (node && BABYLON.Vector3.Distance(this.owner.position, node.position) < 1) {
-//         this.onHit(node);
-        
-//         // if (name === "ground") {
-//         //   setTimeout(() => this.nextTurn(), 1000); // 碰到地面后进入下一个回合
-//         // }
-//         this.destroy();
-//         return;
-//       }
-//     }
-//   }
-
-//   destroy(): void {
-//     this.owner.dispose();
-//     ComponentUpdateManager.getInstance().unregister(this);
-//   }
-// }
-
 export async function createScene(engine: BABYLON.Engine): Promise<BABYLON.Scene> {
   const scene = new BABYLON.Scene(engine);
 
@@ -630,98 +585,98 @@ export async function createScene(engine: BABYLON.Engine): Promise<BABYLON.Scene
     manager.start(choice);
   }, 0);
 
-// 创建 AdvancedDynamicTexture
-// let advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+//创建 AdvancedDynamicTexture
+let advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-// function createResponsiveUI(advancedTexture: GUI.AdvancedDynamicTexture, designAspect: number = 9 / 16) {
-//   // 创建主容器（UI 内容都放进去）
-//   const container = new GUI.Rectangle("MainContainer");
-//   container.thickness = 0;
-//   container.height = "100%";
-//   container.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER;
-//   container.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+function createResponsiveUI(advancedTexture: GUI.AdvancedDynamicTexture, designAspect: number = 9 / 16) {
+  // 创建主容器（UI 内容都放进去）
+  const container = new GUI.Rectangle("MainContainer");
+  container.thickness = 0;
+  container.height = "100%";
+  container.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+  container.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
 
-//   // 将 container 添加到 UI 上
-//   advancedTexture.addControl(container);
+  // 将 container 添加到 UI 上
+  advancedTexture.addControl(container);
 
-//   // 每帧动态更新宽度，使其保持等比
-//   //advancedTexture.getScene().onBeforeRenderObservable.add(() => {
-//     const screenWidth = advancedTexture.getSize().width;
-//     const screenHeight = advancedTexture.getSize().height;
+  // 每帧动态更新宽度，使其保持等比
+  //advancedTexture.getScene().onBeforeRenderObservable.add(() => {
+    const screenWidth = advancedTexture.getSize().width;
+    const screenHeight = advancedTexture.getSize().height;
 
-//     const actualAspect = screenWidth / screenHeight;
-//     let targetWidthPercent = 1;
+    const actualAspect = screenWidth / screenHeight;
+    let targetWidthPercent = 1;
 
-//     if (actualAspect > designAspect) {
-//       // 屏幕太宽了，按高度撑满，高度 = 100%，宽度 < 100%
-//       targetWidthPercent = designAspect / actualAspect;
-//     } else {
-//       // 屏幕正常，不需要缩放
-//       targetWidthPercent = 1;
-//     }
+    if (actualAspect > designAspect) {
+      // 屏幕太宽了，按高度撑满，高度 = 100%，宽度 < 100%
+      targetWidthPercent = designAspect / actualAspect;
+    } else {
+      // 屏幕正常，不需要缩放
+      targetWidthPercent = 1;
+    }
 
-//     container.width = `${targetWidthPercent * 100}%`;
-//  // });
+    container.width = `${targetWidthPercent * 100}%`;
+ // });
 
-//   return container;
-// }
+  return container;
+}
 
-// // 绑定到 canvas resize，再强制刷新尺寸（手动模拟）
-// function forceRefreshAdvancedTexture() {
-//   const screenWidth = engine.getRenderWidth();
-//   const screenHeight = engine.getRenderHeight();
+// 绑定到 canvas resize，再强制刷新尺寸（手动模拟）
+function forceRefreshAdvancedTexture() {
+  const screenWidth = engine.getRenderWidth();
+  const screenHeight = engine.getRenderHeight();
   
-//   const targetAspect = 16 / 9; // UI设计比例
+  const targetAspect = 16 / 9; // UI设计比例
 
-//   // 高度占满
-//   const uiHeight = screenHeight;
-//   const uiWidth = screenHeight * targetAspect; // 宽度根据比例推算
+  // 高度占满
+  const uiHeight = screenHeight;
+  const uiWidth = screenHeight * targetAspect; // 宽度根据比例推算
 
-//   // 缩放 AdvancedDynamicTexture 显示区域
-//   advancedTexture.scaleTo(uiWidth, uiHeight);
+  // 缩放 AdvancedDynamicTexture 显示区域
+  advancedTexture.scaleTo(uiWidth, uiHeight);
 
-//   // 把整个 UI 水平居中显示（如果太宽了，就左右偏移）
-//   const offsetX = (screenWidth - uiWidth) / 2;
-//   advancedTexture.rootContainer.left = `${offsetX}px`;
-//   advancedTexture.rootContainer.top = `0px`; // 顶部对齐
+  // 把整个 UI 水平居中显示（如果太宽了，就左右偏移）
+  const offsetX = (screenWidth - uiWidth) / 2;
+  advancedTexture.rootContainer.left = `${offsetX}px`;
+  advancedTexture.rootContainer.top = `0px`; // 顶部对齐
 
-//   // 刷新 GUI
-//   advancedTexture.markAsDirty();
-// }
-// setTimeout(() => {
-//   // 解析加载的 GUI 数据
-//   advancedTexture.parseSerializedObject(guiData, true);
-//  // createResponsiveUI(advancedTexture)
-//   const screenHeight = engine.getRenderHeight();
-//  // advancedTexture.idealWidth =393; // 你的 UI 设计高度（例如 1080）
-// advancedTexture.idealHeight = 852; // 你的 UI 设计宽度（例如 1920）【注意：高度优先】
+  // 刷新 GUI
+  advancedTexture.markAsDirty();
+}
+setTimeout(() => {
+  // 解析加载的 GUI 数据
+  advancedTexture.parseSerializedObject(guiData, true);
+ // createResponsiveUI(advancedTexture)
+  const screenHeight = engine.getRenderHeight();
+ // advancedTexture.idealWidth =393; // 你的 UI 设计高度（例如 1080）
+advancedTexture.idealHeight = 852; // 你的 UI 设计宽度（例如 1920）【注意：高度优先】
 
-// const root = advancedTexture.rootContainer.children[0] as GUI.Control;
-// root.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-// //root.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+const root = advancedTexture.rootContainer.children[0] as GUI.Control;
+root.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+//root.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER;
 
-// advancedTexture.renderAtIdealSize = true; // 自动按比例适配 canvas，居中显示
-//   // 遍历 rootContainer.children 获取所有的控件
-//   advancedTexture.rootContainer.children.forEach(control => {
-//       // 找到 Button-bjs 按钮
-//       if (control.name === "Button-bjs" && control instanceof GUI.Button) {
-//           console.log("Found Button-bjs:", control);
+advancedTexture.renderAtIdealSize = true; // 自动按比例适配 canvas，居中显示
+  // 遍历 rootContainer.children 获取所有的控件
+  advancedTexture.rootContainer.children.forEach(control => {
+      // 找到 Button-bjs 按钮
+      if (control.name === "Button-bjs" && control instanceof GUI.Button) {
+          console.log("Found Button-bjs:", control);
   
-//           manager.throwButton = control;
+          manager.throwButton = control;
   
-//           // 找到按钮上的文本并更改
-//           if (control.children.length > 0) {
-//             control.children.forEach(child => {
-//                 if (child instanceof GUI.TextBlock) {
-//                     console.log("Found Text inside Button-bjs:", child);
-//                     child.text = "Throw";  // 修改文本
-//                 }
-//             });
-//           }
-//       }
-//   });
-//  // forceRefreshAdvancedTexture();
-// }, 500);
+          // 找到按钮上的文本并更改
+          if (control.children.length > 0) {
+            control.children.forEach(child => {
+                if (child instanceof GUI.TextBlock) {
+                    console.log("Found Text inside Button-bjs:", child);
+                    child.text = "Throw";  // 修改文本
+                }
+            });
+          }
+      }
+  });
+ // forceRefreshAdvancedTexture();
+}, 500);
 
   return scene;
 }

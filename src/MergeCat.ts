@@ -7,7 +7,6 @@
  //import Ammo from "ammo.js";
  //import { AmmoJSPlugin2 } from "@babylonjs/core/Physics/Plugins/ammoJSPlugin";
 
- 
 export async function createScene(engine: BABYLON.Engine): Promise<BABYLON.Scene> {
 const scene = new BABYLON.Scene(engine);
 

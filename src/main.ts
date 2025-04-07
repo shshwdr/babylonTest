@@ -1,5 +1,7 @@
 import * as BABYLON from "@babylonjs/core";
-import { createScene }  from "./MergeCat";
+import { createScene as mergeCat }  from "./MergeCat";
+import { createScene as vs }  from "./CatVsDogGame";
+
 import { ComponentUpdateManager } from "./ComponentSystem";
 import { Inspector } from "@babylonjs/inspector";
 
@@ -8,8 +10,26 @@ const engine = new BABYLON.Engine(canvas, true);
 
 let scene: BABYLON.Scene;
 
+ let currentGameMode: number = 1; // 默认为模式 1
+  export async function reloadScene(mode: number = currentGameMode): Promise<void> {
+  currentGameMode = mode; // 保存当前模式
+  await init(); // 重新创建场景
+}
 async function init() {
-  scene = await createScene(engine);
+  switch (currentGameMode) {
+    case 1:
+      scene = await mergeCat(engine);
+      break;
+    case 2:
+      scene = await vs(engine);
+      break;
+    case 3:
+      // 添加其他游戏模式的创建逻辑
+      break;
+    default:
+      console.error("Invalid game mode");
+      return;
+  }
   engine.runRenderLoop(() => {
     ComponentUpdateManager.getInstance().update(engine.getDeltaTime() / 1000);
     scene.render();
@@ -28,14 +48,17 @@ window.addEventListener("resize", () => {
 });
 
 window.addEventListener("keydown", (event) => {
-    if (event.key.toLowerCase() === "r") {
+
+  const allowedModes = [1, 2, 3];
+const num = Number(event.key);
+if (allowedModes.includes(num)) {
+  reloadScene(num);
+}
+    else if (event.key.toLowerCase() === "r") {
         reloadScene();
     }
 });
 
-export async function reloadScene(): Promise<void> {
-  init()
-}
 // Inspector.Show(scene, {
  
 // });

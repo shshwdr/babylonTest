@@ -40,7 +40,7 @@ plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_NONE;
     this.spritePlane = plane;
   
     const mat = new BABYLON.StandardMaterial("mat", scene);
-    mat.diffuseTexture = new BABYLON.Texture(`/textures/${info.name}.png`, scene);
+    mat.diffuseTexture = new BABYLON.Texture(`textures/${info.name}.png`, scene);
     mat.diffuseTexture.hasAlpha = true;
     mat.emissiveColor = new BABYLON.Color3(1, 1, 1);
     mat.backFaceCulling = false;
