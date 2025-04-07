@@ -1,8 +1,8 @@
 // CatVsDogGame.ts - 增加背景贴图、风力指示、回合显示、力度条与投掷逻辑改进
 import * as BABYLON from "@babylonjs/core";
 import * as GUI from "@babylonjs/gui";
-import guiData from '../public/assets/Frame1.json';
-import { Component, addComponent, getComponent, ComponentUpdateManager } from "./ComponentSystem";
+import guiData from '../../public/assets/Frame1.json';
+import { Component, addComponent, getComponent, ComponentUpdateManager } from "../ComponentSystem";
 
 class GameManager {
   public playerNode?: BABYLON.Mesh;

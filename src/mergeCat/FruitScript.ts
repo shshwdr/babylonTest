@@ -1,7 +1,7 @@
 import * as BABYLON from "@babylonjs/core";
 import { GameSettings } from "./GameSettings";
 import { FruitManager } from "./FruitManager";
-import { Component } from "./ComponentSystem";
+import { Component } from "../ComponentSystem";
 
 export class FruitScript extends Component {
   public fruitName: string;

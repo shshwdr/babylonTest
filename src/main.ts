@@ -1,6 +1,6 @@
 import * as BABYLON from "@babylonjs/core";
-import { createScene as mergeCat }  from "./MergeCat";
-import { createScene as vs }  from "./CatVsDogGame";
+import { createScene as mergeCat }  from "./mergeCat/MergeCat";
+import { createScene as vs }  from "./vs/CatVsDogGame";
 
 import { ComponentUpdateManager } from "./ComponentSystem";
 import { Inspector } from "@babylonjs/inspector";

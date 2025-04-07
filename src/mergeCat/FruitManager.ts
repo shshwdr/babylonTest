@@ -3,7 +3,7 @@ import * as GUI from "@babylonjs/gui";
 import { GameSettings } from "./GameSettings";
 import { DragController } from "./DragController";
 import { FruitScript } from "./FruitScript";
-import { addComponent,removeComponent } from "./ComponentSystem"; // ✅ 替代 TOOLKIT
+import { addComponent,removeComponent } from "../ComponentSystem"; // ✅ 替代 TOOLKIT
 
 export class FruitManager {
   static scene: BABYLON.Scene;
