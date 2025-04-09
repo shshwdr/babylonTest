@@ -2,6 +2,7 @@ import * as BABYLON from "@babylonjs/core";
 import { createScene as mergeCat }  from "./games/mergeCat/MergeCat";
 import { createScene as vs }  from "./games/vs/CatVsDogGame";
 import { createScene as barbecue } from "./games/barbecue/BarbecueGame";
+import { createScene as hangman } from "./games/hangman/Hangman";
 
 import { ComponentUpdateManager } from "./ComponentSystem";
 import { Inspector } from "@babylonjs/inspector";
@@ -27,10 +28,15 @@ async function init() {
     case 2:
       scene = await vs(engine);
       break;
-    case 3:
-      result  = await barbecue(engine);
-      scene = result.scene;
-      world = result.world;
+      case 3:
+        result  = await barbecue(engine);
+        scene = result.scene;
+        world = result.world;
+        break;
+        case 4:
+          result  = await hangman(engine);
+          scene = result.scene;
+          world = result.world;
       break;
     default:
       console.error("Invalid game mode");

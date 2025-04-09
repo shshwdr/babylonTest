@@ -8,7 +8,6 @@ export const BarbecueSettings = {
   endY: 5, // 食物排列线在顶端位置附近
 
   rounds: [
-    {count:1,speedRange: [3, 3]},
     { count: 3, speedRange: [3, 3] },
     { count: 4, speedRange: [3, 4] },
     { count: 5, speedRange: [3, 5] },

@@ -23,6 +23,7 @@ export class FloatingTextManager {
 
     this.ui.addControl(txt);
     this.texts.push(txt);
+    txt.isPointerBlocker = false
 
     // 自动销毁
     setTimeout(() => {
