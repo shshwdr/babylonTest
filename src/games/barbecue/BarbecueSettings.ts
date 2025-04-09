@@ -3,7 +3,7 @@ export const BarbecueSettings = {
   skewerDuration: 0.1, // 签子伸出的动画时长（秒）
   maxSkewerAngle: 30, // 签子最大偏离垂直角度（度）
   foodSpacing: 2.0, // 每个食物间隔（单位世界坐标）
-  foodRadius: 0.5, // 食物的半径
+  foodRadius: 0.8, // 食物的半径
   startY: -7, // 签子的起点 y 坐标（底部）
   endY: 5, // 食物排列线在顶端位置附近
 

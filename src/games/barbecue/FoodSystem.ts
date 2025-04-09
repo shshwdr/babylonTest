@@ -77,6 +77,7 @@ for (let i = diff; i < count + diff; i++) {
   mat.emissiveTexture.hasAlpha = true;
   mat.disableLighting = true;
 food.material = mat;
+food.scaling.setAll(1.6);
   
 
 
