@@ -99,7 +99,7 @@ this.skewerRoot.rotation.z = angle - Math.PI / 2;
       if (dist2D <= BarbecueSettings.foodRadius) {
         hitCount++;
         FloatingTextManager.showFloatingText("+"+hitCount, food.mesh.position, this.scene); // 这里可以改为具体分数
-        food.mesh.dispose();
+        //food.mesh.dispose();
       }
     }
 
