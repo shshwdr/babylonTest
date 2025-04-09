@@ -3,7 +3,7 @@
  import { UIManager } from "./UIManager";
  import { GameSettings } from "./GameSettings";
  import { FruitScript } from "./FruitScript";
- import { getAllComponentsOfType } from "../ComponentSystem";
+ import { getAllComponentsOfType } from "../../ComponentSystem";
  //import Ammo from "ammo.js";
  //import { AmmoJSPlugin2 } from "@babylonjs/core/Physics/Plugins/ammoJSPlugin";
 

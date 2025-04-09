@@ -1,7 +1,7 @@
 import * as BABYLON from "@babylonjs/core";
 import { FruitManager } from "./FruitManager";
 import { GameSettings } from "./GameSettings";
-import { Component } from "../ComponentSystem";
+import { Component } from "../../ComponentSystem";
 
 export class DragController extends Component {
   private isDragging = true;

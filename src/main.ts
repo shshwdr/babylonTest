@@ -1,6 +1,6 @@
 import * as BABYLON from "@babylonjs/core";
-import { createScene as mergeCat }  from "./mergeCat/MergeCat";
-import { createScene as vs }  from "./vs/CatVsDogGame";
+import { createScene as mergeCat }  from "./games/mergeCat/MergeCat";
+import { createScene as vs }  from "./games/vs/CatVsDogGame";
 import { createScene as barbecue } from "./games/barbecue/BarbecueGame";
 
 import { ComponentUpdateManager } from "./ComponentSystem";
