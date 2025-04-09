@@ -1,109 +1,42 @@
-type Vec2 = { x: number; y: number };
+import * as BABYLON from "@babylonjs/core";
 
-export type TapCallback = (pos: Vec2) => void;
-export type SwipeCallback = (direction: "up" | "down" | "left" | "right", distance: number) => void;
-export type LongPressCallback = (pos: Vec2) => void;
+type Vec2 = { x: number, y: number };
+type TapCallback = (info: BABYLON.PointerInfo) => void;
+type SwipeCallback = (dir: "up" | "down" | "left" | "right", distance: number) => void;
+type LongPressCallback = (pos: Vec2) => void;
 
 export class InputManager {
-  private static canvas: HTMLCanvasElement;
-  private static tapListeners = new Set<TapCallback>();
-  private static swipeListeners = new Set<SwipeCallback>();
-  private static longPressListeners = new Set<LongPressCallback>();
+  private static scene: BABYLON.Scene;
+  private static tapListeners: TapCallback[] = [];
+  private static swipeListeners: SwipeCallback[] = [];
+  private static longPressListeners: LongPressCallback[] = [];
 
-  // 内部状态
   private static touchStartPos: Vec2 | null = null;
   private static touchStartTime: number = 0;
   private static longPressTimeout: number | null = null;
 
-  static init(canvas: HTMLCanvasElement) {
-    this.canvas = canvas;
+  static init(scene: BABYLON.Scene) {
+    this.scene = scene;
 
-    // 触屏事件
-    canvas.addEventListener("touchstart", this.handleTouchStart, false);
-    canvas.addEventListener("touchend", this.handleTouchEnd, false);
-    canvas.addEventListener("touchmove", this.handleTouchMove, false);
-
-    // PC 模拟
-    canvas.addEventListener("mousedown", this.handleMouseDown, false);
-    canvas.addEventListener("mouseup", this.handleMouseUp, false);
+    scene.onPointerObservable.add(this.handlePointerDown, BABYLON.PointerEventTypes.POINTERDOWN);
+    scene.onPointerObservable.add(this.handlePointerUp, BABYLON.PointerEventTypes.POINTERUP);
   }
 
-  // 注册监听
-  static onTap(cb: TapCallback) {
-    this.tapListeners.add(cb);
+  static onTap(callback: TapCallback) {
+    this.tapListeners.push(callback);
   }
 
-  static onSwipe(cb: SwipeCallback) {
-    this.swipeListeners.add(cb);
+  static onSwipe(callback: SwipeCallback) {
+    this.swipeListeners.push(callback);
   }
 
-  static onLongPress(cb: LongPressCallback) {
-    this.longPressListeners.add(cb);
+  static onLongPress(callback: LongPressCallback) {
+    this.longPressListeners.push(callback);
   }
 
-  static clear() {
-    this.tapListeners.clear();
-    this.swipeListeners.clear();
-    this.longPressListeners.clear();
-  }
-
-  // 内部处理函数
-  private static getTouchPos(e: TouchEvent | MouseEvent): Vec2 {
-    const rect = this.canvas.getBoundingClientRect();
-    const x = (e instanceof TouchEvent ? e.touches[0]?.clientX : e.clientX) - rect.left;
-    const y = (e instanceof TouchEvent ? e.touches[0]?.clientY : e.clientY) - rect.top;
-    return { x, y };
-  }
-
-  private static handleTouchStart = (e: TouchEvent) => {
-    if (e.touches.length !== 1) return;
-    this.touchStartPos = this.getTouchPos(e);
+  private static handlePointerDown = (info: BABYLON.PointerInfo) => {
     this.touchStartTime = performance.now();
-
-    // 长按判断
-    this.longPressTimeout = window.setTimeout(() => {
-      if (this.touchStartPos) {
-        for (const cb of this.longPressListeners) cb(this.touchStartPos);
-      }
-    }, 600); // ms 可调整
-  };
-
-  private static handleTouchEnd = (e: TouchEvent) => {
-    const endPos = this.getTouchPos(e);
-    const startPos = this.touchStartPos;
-    const deltaTime = performance.now() - this.touchStartTime;
-
-    window.clearTimeout(this.longPressTimeout!);
-
-    if (startPos) {
-      const dx = endPos.x - startPos.x;
-      const dy = endPos.y - startPos.y;
-      const dist = Math.hypot(dx, dy);
-
-      if (deltaTime < 500 && dist < 10) {
-        // tap
-        for (const cb of this.tapListeners) cb(endPos);
-      } else if (dist >= 20 && deltaTime < 1000) {
-        // swipe
-        const isHorizontal = Math.abs(dx) > Math.abs(dy);
-        const dir: "up" | "down" | "left" | "right" = isHorizontal
-          ? dx > 0 ? "right" : "left"
-          : dy > 0 ? "down" : "up";
-
-        for (const cb of this.swipeListeners) cb(dir, dist);
-      }
-    }
-
-    this.touchStartPos = null;
-  };
-
-  private static handleTouchMove = (e: TouchEvent) => {
-    // 你可以在这里做 joystick 检测等
-  };
-
-  private static handleMouseDown = (e: MouseEvent) => {
-    this.touchStartPos = this.getTouchPos(e);
-    this.touchStartTime = performance.now();
+    this.touchStartPos = this.getPointerPos(info);
 
     this.longPressTimeout = window.setTimeout(() => {
       if (this.touchStartPos) {
@@ -112,8 +45,8 @@ export class InputManager {
     }, 600);
   };
 
-  private static handleMouseUp = (e: MouseEvent) => {
-    const endPos = this.getTouchPos(e);
+  private static handlePointerUp = (info: BABYLON.PointerInfo) => {
+    const endPos = this.getPointerPos(info);
     const startPos = this.touchStartPos;
     const deltaTime = performance.now() - this.touchStartTime;
 
@@ -125,17 +58,82 @@ export class InputManager {
       const dist = Math.hypot(dx, dy);
 
       if (deltaTime < 500 && dist < 10) {
-        for (const cb of this.tapListeners) cb(endPos);
+        for (const cb of this.tapListeners) cb(info);
       } else if (dist >= 20 && deltaTime < 1000) {
         const isHorizontal = Math.abs(dx) > Math.abs(dy);
         const dir: "up" | "down" | "left" | "right" = isHorizontal
           ? dx > 0 ? "right" : "left"
           : dy > 0 ? "down" : "up";
-
         for (const cb of this.swipeListeners) cb(dir, dist);
       }
     }
 
     this.touchStartPos = null;
   };
+
+ static getPointerPos(info: BABYLON.PointerInfo): Vec2 {
+    const evt = info.event as PointerEvent;
+    const canvas = this.scene.getEngine().getRenderingCanvas()!;
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: evt.clientX - rect.left,
+      y: evt.clientY - rect.top,
+    };
+  }
+
+  static getPointerWorldPosFromEvent(info: BABYLON.PointerInfo): BABYLON.Vector3 {
+    const evt = info.event as PointerEvent;
+    const canvas = this.scene.getEngine().getRenderingCanvas()!;
+    const pick = this.scene.pick(evt.clientX, evt.clientY);
+    
+    const rect = canvas.getBoundingClientRect();
+    //return new BABYLON.Vector3(evt.clientX - rect.left, evt.clientY - rect.top, 0);
+    return pick?.pickedPoint ?? new BABYLON.Vector3(0, 0, 0);
+  }
+
+  static getPointerWorldPosOnYPlane(info: BABYLON.PointerInfo, y: number = 0): BABYLON.Vector3 {
+    const engine = this.scene.getEngine();
+    const camera = this.scene.activeCamera!;
+    const evt = info.event as PointerEvent;
+  
+    const canvas = engine.getRenderingCanvas()!;
+    const rect = canvas.getBoundingClientRect();
+    const x = evt.clientX - rect.left;
+    const yPixel = evt.clientY - rect.top;
+  
+    const ray = this.scene.createPickingRay(x, yPixel, BABYLON.Matrix.Identity(), camera, false);
+  
+    const plane = new BABYLON.Plane(0, 1, 0, -y); // Y = y 平面
+    const dist = ray.intersectsPlane(plane);
+  
+    if (dist === null) return BABYLON.Vector3.Zero();
+  
+    // ✅ 计算交点位置：origin + direction * distance
+    return ray.origin.add(ray.direction.scale(dist));
+  }
+  static getPointerWorldPosFromInfo(info: BABYLON.PointerInfo): BABYLON.Vector3 {
+    const engine = this.scene.getEngine();
+    const camera = this.scene.activeCamera!;
+    const evt = info.event as PointerEvent;
+  
+    const canvas = engine.getRenderingCanvas()!;
+    const rect = canvas.getBoundingClientRect();
+    const x = evt.clientX - rect.left;
+    const y = evt.clientY - rect.top;
+  
+    // 从屏幕坐标构建 clip-space 坐标
+    const screen = new BABYLON.Vector3(x, y, 0); // Z = 0 表示近平面
+  
+    return BABYLON.Vector3.Unproject(
+      screen,
+      engine.getRenderWidth(),
+      engine.getRenderHeight(),
+      BABYLON.Matrix.Identity(),
+      camera.getViewMatrix(),
+      camera.getProjectionMatrix()
+    );
+  }
+  
+  
+  
 }

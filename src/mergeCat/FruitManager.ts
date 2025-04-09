@@ -45,7 +45,7 @@ export class FruitManager {
         removeComponent(this.currentFruit.owner, DragController);
       }
 
-    const fruitScript = this.spawnFruit(randomFruit()); // ✅ 改名更语义化
+    const fruitScript = this.spawnFruit(randomFruit());
     this.currentFruit = fruitScript;
   
     const drag = new DragController(fruitScript.owner); // ✅ 传入 TransformNode
